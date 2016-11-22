@@ -1,0 +1,154 @@
+<!DOCTYPE>
+
+<html>
+
+	<head>
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+
+		<script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+		<script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.1.2/cytoscape-dagre.js"></script>
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/agate.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+
+		<script>
+			$(function(){
+
+				var layout = {
+  				name: 'dagre', //'circle'; //'grid'; // 'concentric' // 'dagre'
+					rankDir: 'LR',
+				}
+				var cy = window.cy = cytoscape({
+					container: $('#cy'),
+					layout: layout,
+					style: [
+						{
+							selector: 'node',
+							style: {
+								'content': 'data(label)',
+								'shape': 'rectangle',
+								'width': 'label',
+								'height': 'label',
+								'padding-left':   '1em',
+								'padding-right':  '1em',
+								'padding-top':    '1em',
+								'padding-bottom': '1em',
+								'text-valign': 'center',
+								'text-halign': 'center',
+								'background-color': '#222',
+								'color': '#fff',
+								'opacity': 0.8,
+							}
+						}, {
+							selector: 'node.running',
+							style: {
+								'opacity': 1,
+								'border-width': 1,
+								'border-color': '#fff',
+							}
+						}, {
+							selector: 'edge',
+							style: {
+								'width': 2,
+								'target-arrow-shape': 'triangle',
+								'line-color': '#a2fca2',
+								'target-arrow-color': '#a2fca2',
+								'curve-style': 'bezier',
+							}
+						}, {
+							selector: 'edge.volumes_from',
+							style: {
+								'line-color': '#555',
+								'target-arrow-shape': 'circle',
+								'target-arrow-color': '#555',
+							}
+						}
+					],
+					boxSelectionEnabled: false,
+					wheelSensitivity: 0.5
+				});
+
+				cy.on('tap', 'node', function(evt){
+				  var node = evt.cyTarget;
+				  console.log( 'tapped ' + node.id() );
+					info = node.data().info
+					$('#header h1').html(info.name);
+					var info_str = JSON.stringify(info, null, 2);
+					$('#info code').html(info_str);
+					$('#info code').each(function(i, block) {
+    				hljs.highlightBlock(block);
+  				});
+				});
+
+				$.when(
+					$.get("api/nodes"),
+					$.get("api/edges")
+				).done(function (ns, es) {
+					cy.add({
+						nodes: ns[0].nodes,
+						edges: es[0].edges
+					});
+					cy.layout(layout);
+				});
+
+			});
+		</script>
+
+
+		<style>
+			html,body {
+					padding:0;
+					margin:0;
+					height:100%;
+					font-family: monospace;;
+					background: #333;
+				}
+
+				#cy {
+					width: 50%;
+					height: 100%;
+					float: left;
+					font-size: 14px;
+					color: #a2fca2;
+				}
+
+				#panel {
+					width: 50%;
+					float: right;
+				}
+
+				#header {
+					color: #fff;
+					height: 5%;
+				}
+
+				#info {
+					height: 95%;
+					overflow: scroll;
+				}
+
+				#info * {
+					overflow: visible;
+				}
+
+				h1 {
+					font-size: 1em;
+				}
+
+		</style>
+		<title>Gadget</title>
+	</head>
+
+	<body>
+		<div id="cy"></div>
+		<div id="panel">
+			<div id="header"><h1></h1></div>
+			<div id="info"><pre><code class="json"></code></pre></div>
+		</div>
+
+	</body>
+
+</html>
