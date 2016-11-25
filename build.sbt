@@ -7,11 +7,11 @@ lazy val dv = project
   .in(file("."))
   .settings(
     scalaVersion in ThisBuild := "2.11.8",
+
     libraryDependencies ++= Seq(
       "io.circe" %% "circe-core",
       "io.circe" %% "circe-generic",
-      "io.circe" %% "circe-parser",
-      "io.circe" %% "circe-optics"
+      "io.circe" %% "circe-parser"
     ).map(_ % circeVersion),
 
     libraryDependencies ++= Seq(
